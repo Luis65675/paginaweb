@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro Moderno</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="background-glow"></div>
+
+    <div class="card-container">
+        <!-- Paso 1: Formulario de Registro -->
+        <div id="register-section" class="form-section active">
+            <h2>Crear Cuenta</h2>
+            <p class="subtitle">Ingresa tus datos personales</p>
+            
+            <form id="register-form">
+                <div class="input-group">
+                    <input type="text" id="nombres" required placeholder=" ">
+                    <label>Nombres</label>
+                </div>
+                <div class="input-group">
+                    <input type="text" id="apellidos" required placeholder=" ">
+                    <label>Apellidos</label>
+                </div>
+                <div class="input-group">
+                    <input type="text" id="cedula" required placeholder=" ">
+                    <label>Cédula</label>
+                </div>
+                <div class="input-group">
+                    <input type="tel" id="telefono" required placeholder=" ">
+                    <label>Teléfono</label>
+                </div>
+                <div class="input-group">
+                    <input type="email" id="email" required placeholder=" ">
+                    <label>Correo Electrónico</label>
+                </div>
+                <button type="submit" class="btn-primary" id="btn-register">Continuar</button>
+            </form>
+        </div>
+
+        <!-- Paso 2: Verificación de Código -->
+        <div id="verify-section" class="form-section hidden">
+            <h2>Verifica tu Correo</h2>
+            <p class="subtitle">Introduce el código de 6 dígitos enviado a tu bandeja.</p>
+            
+            <form id="verify-form">
+                <div class="input-group">
+                    <input type="text" id="codigo" maxlength="6" required placeholder=" ">
+                    <label>Código de Verificación</label>
+                </div>
+                <button type="submit" class="btn-primary" id="btn-verify">Verificar Cuenta</button>
+            </form>
+        </div>
+        
+        <div id="message" class="message"></div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
