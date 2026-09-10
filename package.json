@@ -5,7 +5,7 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "postinstall": "npm install --os=linux --cpu=x64 sqlite3"
+    "postinstall": "npm install sqlite3 --build-from-source"
   },
   "dependencies": {
     "cors": "^2.8.5",
