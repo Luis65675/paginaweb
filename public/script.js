@@ -107,11 +107,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 const data = await response.json();
 
                 if (response.ok) {
+                    // Guardamos el correo del usuario logueado en localStorage para validar sus comentarios
+                    if (data.usuario && data.usuario.email) {
+                        localStorage.setItem('usuarioLogueado', data.usuario.email);
+                    }
                     messageDiv.textContent = '';
                     loginSection.classList.remove('active');
                     loginSection.classList.add('hidden');
                     perfilSection.classList.remove('hidden');
                     perfilSection.classList.add('active');
+                    cargarComentariosPublicos(); // Actualiza la lista al iniciar sesión para mostrar botones propios
                 } else {
                     messageDiv.textContent = data.error || 'Credenciales incorrectas.';
                     messageDiv.style.color = '#f43f5e';
@@ -143,11 +148,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 const data = await response.json();
 
                 if (response.ok) {
+                    // Guardamos el correo tras verificar con éxito
+                    if (emailActual) {
+                        localStorage.setItem('usuarioLogueado', emailActual);
+                    }
                     messageDiv.textContent = '';
                     verifySection.classList.remove('active');
                     verifySection.classList.add('hidden');
                     perfilSection.classList.remove('hidden');
                     perfilSection.classList.add('active');
+                    cargarComentariosPublicos();
                 } else {
                     messageDiv.textContent = data.error || 'Código incorrecto.';
                     messageDiv.style.color = '#f43f5e';
@@ -181,7 +191,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // 4. Bandeja de Comentarios (Enviando directo al Backend / Administrador)
+    // 4. Bandeja de Comentarios (Enviando directo al Backend / Administrador con user_email)
     const formComentario = document.getElementById('form-comentario');
     const listaComentarios = document.getElementById('lista-comentarios');
 
@@ -190,6 +200,7 @@ document.addEventListener('DOMContentLoaded', () => {
             e.preventDefault();
             const nombre = document.getElementById('nombre-comentario').value.trim();
             const texto = document.getElementById('texto-comentario').value.trim();
+            const user_email = localStorage.getItem('usuarioLogueado') || null;
 
             if (nombre && texto) {
                 try {
@@ -199,25 +210,17 @@ document.addEventListener('DOMContentLoaded', () => {
                         body: JSON.stringify({
                             nombre: nombre,
                             estrellas: calificacionSeleccionada,
-                            comentario: texto
+                            comentario: texto,
+                            user_email: user_email
                         })
                     });
 
                     const data = await response.json();
 
                     if (response.ok) {
-                        const nuevoComentario = document.createElement('div');
-                        nuevoComentario.style.cssText = 'background: rgba(0,0,0,0.3); padding: 8px; border-radius: 8px; font-size: 11px; border: 1px solid rgba(255,255,255,0.05); margin-top: 6px;';
-                        nuevoComentario.innerHTML = `
-                            <div style="font-weight: bold; color: #818cf8; display: flex; justify-content: space-between;">
-                                <span>${escapeHtml(nombre)}</span>
-                                <span style="color: #f59e0b;">${'★'.repeat(calificacionSeleccionada)}</span>
-                            </div>
-                            <p style="color: #cbd5e1; margin-top: 2px;">${escapeHtml(texto)}</p>
-                        `;
-                        listaComentarios.prepend(nuevoComentario);
                         formComentario.reset();
                         if (ratingStatus) ratingStatus.textContent = '¡Comentario enviado al administrador correctamente!';
+                        cargarComentariosPublicos(); // Recarga la lista completa desde el servidor con el botón de borrar si aplica
                     } else {
                         alert(data.error || 'No se pudo enviar el comentario.');
                     }
@@ -229,8 +232,61 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // Función para cargar y mostrar los comentarios con opción de borrar si el usuario es dueño
+    async function cargarComentariosPublicos() {
+        if (!listaComentarios) return;
+        try {
+            const response = await fetch('/api/admin/comentarios');
+            const data = await response.json();
+            const usuarioActual = localStorage.getItem('usuarioLogueado');
+
+            if (response.ok && data.success) {
+                listaComentarios.innerHTML = '';
+                data.comentarios.forEach(c => {
+                    const esPropio = usuarioActual && c.user_email === usuarioActual;
+
+                    const nuevoComentario = document.createElement('div');
+                    nuevoComentario.style.cssText = 'background: rgba(0,0,0,0.3); padding: 8px; border-radius: 8px; font-size: 11px; border: 1px solid rgba(255,255,255,0.05); margin-top: 6px;';
+                    nuevoComentario.innerHTML = `
+                        <div style="font-weight: bold; color: #818cf8; display: flex; justify-content: space-between;">
+                            <span>${escapeHtml(c.nombre)}</span>
+                            <span style="color: #f59e0b;">${'★'.repeat(c.estrellas || 0)}</span>
+                        </div>
+                        <p style="color: #cbd5e1; margin-top: 2px;">${escapeHtml(c.comentario)}</p>
+                        ${esPropio ? `<button onclick="borrarMiComentario(${c.id})" style="background: #f43f5e; color: white; border: none; padding: 3px 8px; border-radius: 4px; font-size: 10px; cursor: pointer; margin-top: 5px;"><i class="fa-solid fa-trash"></i> Borrar mi comentario</button>` : ''}
+                    `;
+                    listaComentarios.appendChild(nuevoComentario);
+                });
+            }
+        } catch (err) {
+            console.error('Error al cargar comentarios:', err);
+        }
+    }
+
+    // Llamada global para que los comentarios se carguen al abrir la página
+    cargarComentariosPublicos();
+
     function escapeHtml(text) {
+        if (!text) return '';
         const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
         return text.replace(/[&<>"']/g, function(m) { return map[m]; });
     }
 });
+
+// Función global fuera del DOM para que el botón generado dinámicamente pueda llamarla
+async function borrarMiComentario(id) {
+    if (confirm('¿Deseas eliminar tu comentario?')) {
+        try {
+            const response = await fetch(`/api/admin/comentarios/${id}`, { method: 'DELETE' });
+            if (response.ok) {
+                // Recargamos la página o dispararíamos la recarga de comentarios de forma sencilla
+                location.reload(); 
+            } else {
+                alert('No se pudo eliminar el comentario.');
+            }
+        } catch (err) {
+            console.error(err);
+            alert('Error de conexión.');
+        }
+    }
+}

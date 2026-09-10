@@ -30,12 +30,13 @@ const db = new sqlite3.Database(dbFile, (err) => {
                 verificado INTEGER DEFAULT 0
             )`);
 
-            // Tabla agregada para guardar los comentarios y calificaciones de estrellas
+            // Tabla agregada para guardar los comentarios, calificaciones de estrellas y el correo del usuario
             db.run(`CREATE TABLE IF NOT EXISTS comentarios (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 nombre TEXT NOT NULL,
                 estrellas INTEGER,
                 comentario TEXT NOT NULL,
+                user_email TEXT,
                 fecha DATETIME DEFAULT CURRENT_TIMESTAMP
             )`);
         });
@@ -196,16 +197,16 @@ app.post('/api/verificar', (req, res) => {
     });
 });
 
-// Ruta nueva: Guardar comentarios y puntuación de estrellas
+// Ruta nueva: Guardar comentarios y puntuación de estrellas (ahora recibe user_email)
 app.post('/api/comentarios', (req, res) => {
-    const { nombre, estrellas, comentario } = req.body;
+    const { nombre, estrellas, comentario, user_email } = req.body;
 
     if (!nombre || !comentario) {
         return res.status(400).json({ error: 'El nombre y el comentario son obligatorios.' });
     }
 
-    const query = `INSERT INTO comentarios (nombre, estrellas, comentario) VALUES (?, ?, ?)`;
-    db.run(query, [nombre, estrellas || 0, comentario], function(err) {
+    const query = `INSERT INTO comentarios (nombre, estrellas, comentario, user_email) VALUES (?, ?, ?, ?)`;
+    db.run(query, [nombre, estrellas || 0, comentario, user_email || null], function(err) {
         if (err) {
             console.error(err);
             return res.status(500).json({ error: 'Error al guardar el comentario.' });
@@ -248,7 +249,7 @@ app.delete('/api/admin/usuarios/:id', (req, res) => {
     });
 });
 
-// Ruta 5: Administración - Eliminar un comentario por su ID (NUEVA)
+// Ruta 5: Administración - Eliminar un comentario por su ID
 app.delete('/api/admin/comentarios/:id', (req, res) => {
     const comentarioId = req.params.id;
     db.run(`DELETE FROM comentarios WHERE id = ?`, [comentarioId], function(err) {
