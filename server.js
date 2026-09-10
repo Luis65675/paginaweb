@@ -3,6 +3,7 @@ const express = require('express');
 const sqlite3 = require('sqlite3').verbose();
 const cors = require('cors');
 const path = require('path');
+const bcrypt = require('bcryptjs'); // Agregado para encriptar y verificar contraseñas de forma segura
 
 const app = express();
 app.use(express.json());
@@ -23,52 +24,106 @@ const db = new sqlite3.Database(dbFile, (err) => {
             cedula TEXT UNIQUE NOT NULL,
             telefono TEXT NOT NULL,
             email TEXT UNIQUE NOT NULL,
+            password TEXT NOT NULL,
             codigoVerificacion TEXT,
             verificado INTEGER DEFAULT 0
         )`);
     }
 });
 
-// Ruta 1: Registro y envío de código
-app.post('/api/registrar', (req, res) => {
-    const { nombres, apellidos, cedula, telefono, email } = req.body;
+// Ruta 1: Registro y envío de código (ahora recibe y encripta la contraseña)
+app.post('/api/registrar', async (req, res) => {
+    const { nombres, apellidos, cedula, telefono, email, password } = req.body;
+
+    if (!password) {
+        return res.status(400).json({ error: 'La contraseña es obligatoria.' });
+    }
+
     const codigoVerificacion = Math.floor(100000 + Math.random() * 900000).toString();
 
-    db.get(`SELECT * FROM users WHERE email = ?`, [email], (err, user) => {
+    try {
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(password, salt);
+
+        db.get(`SELECT * FROM users WHERE email = ?`, [email], (err, user) => {
+            if (err) {
+                console.error(err);
+                return res.status(500).json({ error: 'Error en la base de datos.' });
+            }
+
+            if (user) {
+                if (user.verificado === 1) {
+                    return res.status(400).json({ error: 'Este correo ya está registrado y verificado.' });
+                }
+                const updateQuery = `UPDATE users SET nombres = ?, apellidos = ?, cedula = ?, telefono = ?, password = ?, codigoVerificacion = ? WHERE email = ?`;
+                db.run(updateQuery, [nombres, apellidos, cedula, telefono, hashedPassword, codigoVerificacion, email], function(updateErr) {
+                    if (updateErr) {
+                        if (updateErr.message.includes('UNIQUE constraint failed')) {
+                            return res.status(400).json({ error: 'La cédula ya se encuentra registrada.' });
+                        }
+                        return res.status(500).json({ error: 'Error al actualizar el usuario.' });
+                    }
+                    enviarCorreo(email, nombres, codigoVerificacion, res);
+                });
+            } else {
+                const insertQuery = `INSERT INTO users (nombres, apellidos, cedula, telefono, email, password, codigoVerificacion, verificado) VALUES (?, ?, ?, ?, ?, ?, ?, 0)`;
+                db.run(insertQuery, [nombres, apellidos, cedula, telefono, email, hashedPassword, codigoVerificacion], function(insertErr) {
+                    if (insertErr) {
+                        if (insertErr.message.includes('UNIQUE constraint failed')) {
+                            if (insertErr.message.includes('cedula')) {
+                                return res.status(400).json({ error: 'La cédula ya está registrada.' });
+                            }
+                            return res.status(400).json({ error: 'El correo electrónico ya está registrado.' });
+                        }
+                        return res.status(500).json({ error: 'Error al guardar el usuario.' });
+                    }
+                    enviarCorreo(email, nombres, codigoVerificacion, res);
+                });
+            }
+        });
+    } catch (hashErr) {
+        console.error('Error al procesar la contraseña:', hashErr);
+        return res.status(500).json({ error: 'Error interno del servidor.' });
+    }
+});
+
+// Ruta nueva: Iniciar sesión (Login)
+app.post('/api/login', (req, res) => {
+    const { email, password } = req.body;
+
+    if (!email || !password) {
+        return res.status(400).json({ error: 'Por favor, ingresa el correo y la contraseña.' });
+    }
+
+    db.get(`SELECT * FROM users WHERE email = ?`, [email], async (err, user) => {
         if (err) {
             console.error(err);
             return res.status(500).json({ error: 'Error en la base de datos.' });
         }
 
-        if (user) {
-            if (user.verificado === 1) {
-                return res.status(400).json({ error: 'Este correo ya está registrado y verificado.' });
-            }
-            const updateQuery = `UPDATE users SET nombres = ?, apellidos = ?, cedula = ?, telefono = ?, codigoVerificacion = ? WHERE email = ?`;
-            db.run(updateQuery, [nombres, apellidos, cedula, telefono, codigoVerificacion, email], function(updateErr) {
-                if (updateErr) {
-                    if (updateErr.message.includes('UNIQUE constraint failed')) {
-                        return res.status(400).json({ error: 'La cédula ya se encuentra registrada.' });
-                    }
-                    return res.status(500).json({ error: 'Error al actualizar el usuario.' });
-                }
-                enviarCorreo(email, nombres, codigoVerificacion, res);
-            });
-        } else {
-            const insertQuery = `INSERT INTO users (nombres, apellidos, cedula, telefono, email, codigoVerificacion, verificado) VALUES (?, ?, ?, ?, ?, ?, 0)`;
-            db.run(insertQuery, [nombres, apellidos, cedula, telefono, email, codigoVerificacion], function(insertErr) {
-                if (insertErr) {
-                    if (insertErr.message.includes('UNIQUE constraint failed')) {
-                        if (insertErr.message.includes('cedula')) {
-                            return res.status(400).json({ error: 'La cédula ya está registrada.' });
-                        }
-                        return res.status(400).json({ error: 'El correo electrónico ya está registrado.' });
-                    }
-                    return res.status(500).json({ error: 'Error al guardar el usuario.' });
-                }
-                enviarCorreo(email, nombres, codigoVerificacion, res);
-            });
+        if (!user) {
+            return res.status(404).json({ error: 'El correo electrónico no está registrado.' });
         }
+
+        if (user.verificado !== 1) {
+            return res.status(400).json({ error: 'Debes verificar tu cuenta con el código enviado a tu correo antes de iniciar sesión.' });
+        }
+
+        const isMatch = await bcrypt.compare(password, user.password);
+        if (!isMatch) {
+            return res.status(400).json({ error: 'Contraseña incorrecta.' });
+        }
+
+        return res.json({
+            success: true,
+            message: '¡Inicio de sesión exitoso!',
+            usuario: {
+                id: user.id,
+                nombres: user.nombres,
+                apellidos: user.apellidos,
+                email: user.email
+            }
+        });
     });
 });
 
@@ -125,7 +180,7 @@ app.post('/api/verificar', (req, res) => {
                 return res.json({ success: true, message: '¡Cuenta verificada con éxito!' });
             });
         } else {
-            return res.status(400).json({ error: 'Código incorrecto.' });
+            return res.status(00).json({ error: 'Código incorrecto.' });
         }
     });
 });

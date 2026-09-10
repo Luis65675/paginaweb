@@ -1,10 +1,40 @@
 document.addEventListener('DOMContentLoaded', () => {
     const registerForm = document.getElementById('register-form');
+    const loginForm = document.getElementById('login-form');
     const verifyForm = document.getElementById('verify-form');
+    
     const registerSection = document.getElementById('register-section');
+    const loginSection = document.getElementById('login-section');
     const verifySection = document.getElementById('verify-section');
     const perfilSection = document.getElementById('perfil-section');
+    
     const messageDiv = document.getElementById('message');
+
+    // Enlaces para alternar entre Registro y Login
+    const showLogin = document.getElementById('show-login');
+    const showRegister = document.getElementById('show-register');
+
+    if (showLogin) {
+        showLogin.addEventListener('click', (e) => {
+            e.preventDefault();
+            registerSection.classList.remove('active');
+            registerSection.classList.add('hidden');
+            loginSection.classList.remove('hidden');
+            loginSection.classList.add('active');
+            messageDiv.textContent = '';
+        });
+    }
+
+    if (showRegister) {
+        showRegister.addEventListener('click', (e) => {
+            e.preventDefault();
+            loginSection.classList.remove('active');
+            loginSection.classList.add('hidden');
+            registerSection.classList.remove('hidden');
+            registerSection.classList.add('active');
+            messageDiv.textContent = '';
+        });
+    }
 
     let emailActual = '';
 
@@ -16,7 +46,7 @@ document.addEventListener('DOMContentLoaded', () => {
         btnWhatsapp.href = `https://wa.me/${telefonoWhatsApp}?text=${encodeURIComponent(mensajeWhatsApp)}`;
     }
 
-    // 1. Manejo del Registro
+    // 1. Manejo del Registro (Con contraseña agregada)
     if (registerForm) {
         registerForm.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -25,6 +55,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const cedula = document.getElementById('cedula').value.trim();
             const telefono = document.getElementById('telefono').value.trim();
             emailActual = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value.trim();
 
             messageDiv.textContent = 'Enviando código de verificación...';
             messageDiv.style.color = '#818cf8';
@@ -33,7 +64,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const response = await fetch('/api/registrar', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ nombres, apellidos, cedula, telefono, email: emailActual })
+                    body: JSON.stringify({ nombres, apellidos, cedula, telefono, email: emailActual, password })
                 });
 
                 const data = await response.json();
@@ -46,6 +77,43 @@ document.addEventListener('DOMContentLoaded', () => {
                     verifySection.classList.add('active');
                 } else {
                     messageDiv.textContent = data.error || 'Ocurrió un error.';
+                    messageDiv.style.color = '#f43f5e';
+                }
+            } catch (err) {
+                console.error(err);
+                messageDiv.textContent = 'Error de conexión con el servidor.';
+                messageDiv.style.color = '#f43f5e';
+            }
+        });
+    }
+
+    // 1.1 Manejo del Inicio de Sesión (Login)
+    if (loginForm) {
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('login-email').value.trim();
+            const password = document.getElementById('login-password').value.trim();
+
+            messageDiv.textContent = 'Iniciando sesión...';
+            messageDiv.style.color = '#818cf8';
+
+            try {
+                const response = await fetch('/api/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    messageDiv.textContent = '';
+                    loginSection.classList.remove('active');
+                    loginSection.classList.add('hidden');
+                    perfilSection.classList.remove('hidden');
+                    perfilSection.classList.add('active');
+                } else {
+                    messageDiv.textContent = data.error || 'Credenciales incorrectas.';
                     messageDiv.style.color = '#f43f5e';
                 }
             } catch (err) {

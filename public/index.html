@@ -13,7 +13,7 @@
     <div class="background-glow"></div>
 
     <div class="card-container">
-        <!-- Paso 1: Formulario de Registro -->
+        <!-- Paso 1: Formulario de Registro (Con contraseña agregada) -->
         <div id="register-section" class="form-section active">
             <h2>Crear Cuenta</h2>
             <p class="subtitle">Ingresa tus datos personales</p>
@@ -39,8 +39,41 @@
                     <input type="email" id="email" required placeholder=" ">
                     <label>Correo Electrónico</label>
                 </div>
+                <!-- Nuevo campo de contraseña para registro -->
+                <div class="input-group">
+                    <input type="password" id="password" required placeholder=" ">
+                    <label>Contraseña</label>
+                </div>
                 <button type="submit" class="btn-primary" id="btn-register">Continuar</button>
             </form>
+
+            <!-- Enlace para cambiar a la sección de Login -->
+            <p style="text-align: center; margin-top: 15px; font-size: 13px; color: #94a3b8;">
+                ¿Ya tienes una cuenta? <a href="#" id="show-login" style="color: #818cf8; text-decoration: none; font-weight: 600;">Inicia Sesión</a>
+            </p>
+        </div>
+
+        <!-- Nueva Sección: Iniciar Sesión (Login) -->
+        <div id="login-section" class="form-section hidden">
+            <h2>Iniciar Sesión</h2>
+            <p class="subtitle">Ingresa con tu correo y contraseña</p>
+            
+            <form id="login-form">
+                <div class="input-group">
+                    <input type="email" id="login-email" required placeholder=" ">
+                    <label>Correo Electrónico</label>
+                </div>
+                <div class="input-group">
+                    <input type="password" id="login-password" required placeholder=" ">
+                    <label>Contraseña</label>
+                </div>
+                <button type="submit" class="btn-primary" id="btn-login">Entrar</button>
+            </form>
+
+            <!-- Enlace para volver al registro -->
+            <p style="text-align: center; margin-top: 15px; font-size: 13px; color: #94a3b8;">
+                ¿No tienes cuenta? <a href="#" id="show-register" style="color: #818cf8; text-decoration: none; font-weight: 600;">Regístrate</a>
+            </p>
         </div>
 
         <!-- Paso 2: Verificación de Código -->
@@ -57,7 +90,7 @@
             </form>
         </div>
 
-        <!-- Paso 3: Perfil Profesional de Servicios (Se muestra al verificar) -->
+        <!-- Paso 3: Perfil Profesional de Servicios (Se muestra al verificar o iniciar sesión) -->
         <div id="perfil-section" class="form-section hidden" style="text-align: left; width: 100%;">
             <div style="text-align: center; margin-bottom: 20px;">
                 <div style="font-size: 40px; color: #6366f1; margin-bottom: 5px;">
@@ -119,7 +152,7 @@
 
                 <div id="lista-comentarios" style="max-height: 120px; overflow-y: auto; display: flex; flex-direction: column; gap: 6px;">
                     <div style="background: rgba(0,0,0,0.3); padding: 8px; border-radius: 8px; font-size: 11px; border: 1px solid rgba(255,255,255,0.05);">
-                        <div style="display: flex; justify-content: space-weight; color: #818cf8; font-weight: bold;">
+                        <div style="display: flex; justify-content: space-between; color: #818cf8; font-weight: bold;">
                             <span>Carlos Mendoza</span>
                         </div>
                         <p style="color: #cbd5e1; margin-top: 2px;">¡Excelente servicio con la cita del pasaporte! Muy recomendado y rápido.</p>
