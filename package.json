@@ -4,8 +4,7 @@
   "description": "Pagina de registro con verificacion por correo",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js",
-    "postinstall": "npm rebuild sqlite3 --update-binary"
+    "start": "node server.js"
   },
   "dependencies": {
     "cors": "^2.8.5",
