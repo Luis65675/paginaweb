@@ -14,12 +14,17 @@ app.use(express.json());
 app.use(cors());
 app.use(express.static('public'));
 
-// Configurar Nodemailer con tu cuenta de Gmail
+// Configurar Nodemailer con host SMTP directo y puerto 465 para evitar conflictos IPv6 en Render
 const transporter = nodemailer.createTransport({
-    service: 'gmail',
+    host: 'smtp.gmail.com',
+    port: 465,
+    secure: true,
     auth: {
         user: process.env.EMAIL_USER, // Usa variables de entorno para mayor seguridad
         pass: process.env.EMAIL_PASS
+    },
+    tls: {
+        rejectUnauthorized: false
     }
 });
 
