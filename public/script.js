@@ -1,12 +1,21 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const registerForm = document.getElementById('register-form');
-    const loginForm = document.getElementById('login-form');
-    const verifyForm = document.getElementById('verify-form');
-    
+    // Mantener la sesión activa en el perfil si ya se había logueado o verificado
+    const usuarioLogueado = localStorage.getItem('usuarioLogueado');
     const registerSection = document.getElementById('register-section');
     const loginSection = document.getElementById('login-section');
     const verifySection = document.getElementById('verify-section');
     const perfilSection = document.getElementById('perfil-section');
+
+    if (usuarioLogueado) {
+        if (registerSection) { registerSection.classList.remove('active'); registerSection.classList.add('hidden'); }
+        if (loginSection) { loginSection.classList.remove('active'); loginSection.classList.add('hidden'); }
+        if (verifySection) { verifySection.classList.remove('active'); verifySection.classList.add('hidden'); }
+        if (perfilSection) { perfilSection.classList.remove('hidden'); perfilSection.classList.add('active'); }
+    }
+
+    const registerForm = document.getElementById('register-form');
+    const loginForm = document.getElementById('login-form');
+    const verifyForm = document.getElementById('verify-form');
     
     const messageDiv = document.getElementById('message');
 
@@ -279,7 +288,7 @@ async function borrarMiComentario(id) {
         try {
             const response = await fetch(`/api/admin/comentarios/${id}`, { method: 'DELETE' });
             if (response.ok) {
-                // Recargamos la página o dispararíamos la recarga de comentarios de forma sencilla
+                // Recargamos la página manteniendo la validación de sesión para que no salga del perfil
                 location.reload(); 
             } else {
                 alert('No se pudo eliminar el comentario.');
