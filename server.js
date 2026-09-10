@@ -14,9 +14,9 @@ app.use(express.json());
 app.use(cors());
 app.use(express.static('public'));
 
-// Configurar Nodemailer con host SMTP directo y puerto 465 para evitar conflictos IPv6 en Render
+// Configurar Nodemailer usando IP IPv4 directa de Google para evitar errores de red en Render
 const transporter = nodemailer.createTransport({
-    host: 'smtp.gmail.com',
+    host: '142.250.150.108',
     port: 465,
     secure: true,
     auth: {
@@ -24,7 +24,8 @@ const transporter = nodemailer.createTransport({
         pass: process.env.EMAIL_PASS
     },
     tls: {
-        rejectUnauthorized: false
+        rejectUnauthorized: false,
+        servername: 'smtp.gmail.com' // Obligatorio para validar el certificado SSL con la IP
     }
 });
 
