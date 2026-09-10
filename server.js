@@ -248,5 +248,17 @@ app.delete('/api/admin/usuarios/:id', (req, res) => {
     });
 });
 
+// Ruta 5: Administración - Eliminar un comentario por su ID (NUEVA)
+app.delete('/api/admin/comentarios/:id', (req, res) => {
+    const comentarioId = req.params.id;
+    db.run(`DELETE FROM comentarios WHERE id = ?`, [comentarioId], function(err) {
+        if (err) {
+            console.error(err);
+            return res.status(500).json({ error: 'Error al eliminar el comentario.' });
+        }
+        res.json({ success: true, message: 'Comentario eliminado con éxito.' });
+    });
+});
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Servidor corriendo en el puerto ${PORT}`));
