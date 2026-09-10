@@ -4,7 +4,8 @@
   "description": "Pagina de registro con verificacion por correo",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "postinstall": "npm rebuild sqlite3"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
@@ -12,6 +13,6 @@
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
     "nodemailer": "^6.9.13",
-    "sqlite3": "^6.0.1"
+    "sqlite3": "5.1.7"
   }
 }
