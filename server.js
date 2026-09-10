@@ -17,17 +17,28 @@ const db = new sqlite3.Database(dbFile, (err) => {
         console.error('Error al conectar con SQLite:', err.message);
     } else {
         console.log('Conectado a la base de datos SQLite.');
-        db.run(`CREATE TABLE IF NOT EXISTS users (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            nombres TEXT NOT NULL,
-            apellidos TEXT NOT NULL,
-            cedula TEXT UNIQUE NOT NULL,
-            telefono TEXT NOT NULL,
-            email TEXT UNIQUE NOT NULL,
-            password TEXT NOT NULL,
-            codigoVerificacion TEXT,
-            verificado INTEGER DEFAULT 0
-        )`);
+        db.serialize(() => {
+            db.run(`CREATE TABLE IF NOT EXISTS users (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                nombres TEXT NOT NULL,
+                apellidos TEXT NOT NULL,
+                cedula TEXT UNIQUE NOT NULL,
+                telefono TEXT NOT NULL,
+                email TEXT UNIQUE NOT NULL,
+                password TEXT NOT NULL,
+                codigoVerificacion TEXT,
+                verificado INTEGER DEFAULT 0
+            )`);
+
+            // Tabla agregada para guardar los comentarios y calificaciones de estrellas
+            db.run(`CREATE TABLE IF NOT EXISTS comentarios (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                nombre TEXT NOT NULL,
+                estrellas INTEGER,
+                comentario TEXT NOT NULL,
+                fecha DATETIME DEFAULT CURRENT_TIMESTAMP
+            )`);
+        });
     }
 });
 
@@ -180,8 +191,37 @@ app.post('/api/verificar', (req, res) => {
                 return res.json({ success: true, message: '¡Cuenta verificada con éxito!' });
             });
         } else {
-            return res.status(00).json({ error: 'Código incorrecto.' });
+            return res.status(400).json({ error: 'Código incorrecto.' });
         }
+    });
+});
+
+// Ruta nueva: Guardar comentarios y puntuación de estrellas
+app.post('/api/comentarios', (req, res) => {
+    const { nombre, estrellas, comentario } = req.body;
+
+    if (!nombre || !comentario) {
+        return res.status(400).json({ error: 'El nombre y el comentario son obligatorios.' });
+    }
+
+    const query = `INSERT INTO comentarios (nombre, estrellas, comentario) VALUES (?, ?, ?)`;
+    db.run(query, [nombre, estrellas || 0, comentario], function(err) {
+        if (err) {
+            console.error(err);
+            return res.status(500).json({ error: 'Error al guardar el comentario.' });
+        }
+        res.json({ success: true, message: '¡Comentario enviado al panel del administrador con éxito!' });
+    });
+});
+
+// Ruta nueva: Administración - Obtener todos los comentarios y puntuaciones
+app.get('/api/admin/comentarios', (req, res) => {
+    db.all(`SELECT * FROM comentarios ORDER BY id DESC`, [], (err, rows) => {
+        if (err) {
+            console.error(err);
+            return res.status(500).json({ error: 'Error al obtener los comentarios.' });
+        }
+        res.json({ success: true, comentarios: rows });
     });
 });
 

@@ -163,41 +163,68 @@ document.addEventListener('DOMContentLoaded', () => {
     // 3. Sistema de Calificación con Estrellas
     const stars = document.querySelectorAll('#star-container i');
     const ratingStatus = document.getElementById('rating-status');
+    let calificacionSeleccionada = 5; // Por defecto 5 estrellas
+
     stars.forEach((star, index) => {
         star.addEventListener('click', () => {
-            const val = index + 1;
+            calificacionSeleccionada = index + 1;
             stars.forEach((s, i) => {
-                if (i < val) {
+                if (i < calificacionSeleccionada) {
                     s.style.color = '#f59e0b';
                 } else {
                     s.style.color = '#475569';
                 }
             });
             if (ratingStatus) {
-                ratingStatus.textContent = `¡Gracias por tu calificación de ${val} estrellas!`;
+                ratingStatus.textContent = `Puntuación seleccionada: ${calificacionSeleccionada} estrellas. (Se guardará al enviar tu comentario)`;
             }
         });
     });
 
-    // 4. Bandeja de Comentarios
+    // 4. Bandeja de Comentarios (Enviando directo al Backend / Administrador)
     const formComentario = document.getElementById('form-comentario');
     const listaComentarios = document.getElementById('lista-comentarios');
 
     if (formComentario) {
-        formComentario.addEventListener('submit', (e) => {
+        formComentario.addEventListener('submit', async (e) => {
             e.preventDefault();
             const nombre = document.getElementById('nombre-comentario').value.trim();
             const texto = document.getElementById('texto-comentario').value.trim();
 
             if (nombre && texto) {
-                const nuevoComentario = document.createElement('div');
-                nuevoComentario.style.cssText = 'background: rgba(0,0,0,0.3); padding: 8px; border-radius: 8px; font-size: 11px; border: 1px solid rgba(255,255,255,0.05); margin-top: 6px;';
-                nuevoComentario.innerHTML = `
-                    <div style="font-weight: bold; color: #818cf8;">${escapeHtml(nombre)}</div>
-                    <p style="color: #cbd5e1; margin-top: 2px;">${escapeHtml(texto)}</p>
-                `;
-                listaComentarios.prepend(nuevoComentario);
-                formComentario.reset();
+                try {
+                    const response = await fetch('/api/comentarios', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            nombre: nombre,
+                            estrellas: calificacionSeleccionada,
+                            comentario: texto
+                        })
+                    });
+
+                    const data = await response.json();
+
+                    if (response.ok) {
+                        const nuevoComentario = document.createElement('div');
+                        nuevoComentario.style.cssText = 'background: rgba(0,0,0,0.3); padding: 8px; border-radius: 8px; font-size: 11px; border: 1px solid rgba(255,255,255,0.05); margin-top: 6px;';
+                        nuevoComentario.innerHTML = `
+                            <div style="font-weight: bold; color: #818cf8; display: flex; justify-content: space-between;">
+                                <span>${escapeHtml(nombre)}</span>
+                                <span style="color: #f59e0b;">${'★'.repeat(calificacionSeleccionada)}</span>
+                            </div>
+                            <p style="color: #cbd5e1; margin-top: 2px;">${escapeHtml(texto)}</p>
+                        `;
+                        listaComentarios.prepend(nuevoComentario);
+                        formComentario.reset();
+                        if (ratingStatus) ratingStatus.textContent = '¡Comentario enviado al administrador correctamente!';
+                    } else {
+                        alert(data.error || 'No se pudo enviar el comentario.');
+                    }
+                } catch (err) {
+                    console.error('Error de conexión:', err);
+                    alert('Error de conexión con el servidor.');
+                }
             }
         });
     }
