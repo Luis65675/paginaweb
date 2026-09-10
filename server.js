@@ -124,5 +124,28 @@ app.post('/api/verificar', (req, res) => {
     });
 });
 
+// Ruta 3: Administración - Obtener todos los usuarios registrados
+app.get('/api/admin/usuarios', (req, res) => {
+    db.all(`SELECT id, nombres, apellidos, cedula, telefono, email, verificado FROM users`, [], (err, rows) => {
+        if (err) {
+            console.error(err);
+            return res.status(500).json({ error: 'Error al obtener los usuarios.' });
+        }
+        res.json({ success: true, usuarios: rows });
+    });
+});
+
+// Ruta 4: Administración - Eliminar un usuario por su ID
+app.delete('/api/admin/usuarios/:id', (req, res) => {
+    const userId = req.params.id;
+    db.run(`DELETE FROM users WHERE id = ?`, [userId], function(err) {
+        if (err) {
+            console.error(err);
+            return res.status(500).json({ error: 'Error al eliminar el usuario.' });
+        }
+        res.json({ success: true, message: 'Usuario eliminado con éxito.' });
+    });
+});
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Servidor corriendo en el puerto ${PORT}`));
