@@ -4,6 +4,10 @@ const sqlite3 = require('sqlite3').verbose();
 const cors = require('cors');
 const nodemailer = require('nodemailer');
 const path = require('path');
+const dns = require('dns');
+
+// Forzar IPv4 para evitar el error ENETUNREACH en Render
+dns.setDefaultResultOrder('ipv4first');
 
 const app = express();
 app.use(express.json());
