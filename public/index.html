@@ -3,9 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Registro Moderno</title>
+    <title>Registro Moderno & Servicios</title>
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome para iconos de estrellas, WhatsApp y perfil -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
     <div class="background-glow"></div>
@@ -53,6 +55,77 @@
                 </div>
                 <button type="submit" class="btn-primary" id="btn-verify">Verificar Cuenta</button>
             </form>
+        </div>
+
+        <!-- Paso 3: Perfil Profesional de Servicios (Se muestra al verificar) -->
+        <div id="perfil-section" class="form-section hidden" style="text-align: left; width: 100%;">
+            <div style="text-align: center; margin-bottom: 20px;">
+                <div style="font-size: 40px; color: #6366f1; margin-bottom: 5px;">
+                    <i class="fa-solid fa-id-badge"></i>
+                </div>
+                <h2 style="font-size: 22px; margin-bottom: 5px;">Servicios Profesionales & Trámites</h2>
+                <p class="subtitle" style="margin-bottom: 10px;">Gestiones en Venezuela & Desarrollo Web</p>
+                <div style="color: #f59e0b; font-size: 14px;">
+                    <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+                    <span style="color: #94a3b8; font-size: 12px;">(4.9/5 Calificación)</span>
+                </div>
+            </div>
+
+            <!-- Descripción Comercial persuasiva -->
+            <div style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); padding: 15px; border-radius: 12px; font-size: 13px; color: #cbd5e1; line-height: 1.5; margin-bottom: 20px;">
+                <p style="margin-bottom: 10px;">
+                    ¿Necesitas resolver tus trámites legales y bancarios en Venezuela de forma <strong>rápida, segura y 100% garantizada</strong>? Evita pérdidas de tiempo. Ofrezco asistencia profesional y gestión directa para:
+                </p>
+                <ul style="list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 12px;">
+                    <li><i class="fa-solid fa-check text-indigo-400"></i> Cita cédula (1era vez / renovación)</li>
+                    <li><i class="fa-solid fa-check text-indigo-400"></i> Cita de Pasaporte</li>
+                    <li><i class="fa-solid fa-check text-indigo-400"></i> Emisión y actualización de R.I.F</li>
+                    <li><i class="fa-solid fa-check text-indigo-400"></i> Bancos (Venezuela, Mercantil, Banesco)</li>
+                    <li><i class="fa-solid fa-check text-indigo-400"></i> Gestión de usuarios Sistema Patria</li>
+                    <li><i class="fa-solid fa-check text-indigo-400"></i> Páginas Web & Apps Móviles</li>
+                </ul>
+                <p style="margin-top: 10px; font-size: 12px; color: #a5b4fc;">
+                    Atención personalizada y absoluta discreción. ¡Contáctame y soluciona tu trámite sin intermediarios!
+                </p>
+            </div>
+
+            <!-- Botón de WhatsApp Directo -->
+            <div style="margin-bottom: 20px;">
+                <a id="btn-whatsapp" href="#" target="_blank" class="btn-primary" style="background: #22c55e; display: flex; align-items: center; justify-content: center; gap: 10px; text-decoration: none;">
+                    <i class="fa-brands fa-whatsapp" style="font-size: 18px;"></i>
+                    <span>Contactar por WhatsApp Directo</span>
+                </a>
+            </div>
+
+            <!-- Sistema de Estrellas y Comentarios -->
+            <div style="border-top: 1px solid rgba(255, 255, 255, 0.1); padding-top: 15px;">
+                <p style="font-size: 13px; font-weight: 600; margin-bottom: 8px; color: #e2e8f0;">Califica este servicio:</p>
+                <div id="star-container" style="display: flex; gap: 8px; font-size: 20px; color: #475569; cursor: pointer; margin-bottom: 12px;">
+                    <i class="fa-solid fa-star" data-value="1"></i>
+                    <i class="fa-solid fa-star" data-value="2"></i>
+                    <i class="fa-solid fa-star" data-value="3"></i>
+                    <i class="fa-solid fa-star" data-value="4"></i>
+                    <i class="fa-solid fa-star" data-value="5"></i>
+                </div>
+                <div id="rating-status" style="font-size: 11px; color: #22c55e; margin-bottom: 15px;"></div>
+
+                <!-- Bandeja de Comentarios -->
+                <p style="font-size: 13px; font-weight: 600; margin-bottom: 8px; color: #e2e8f0;">Bandeja de Comentarios:</p>
+                <form id="form-comentario" style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px;">
+                    <input type="text" id="nombre-comentario" placeholder="Tu Nombre" required style="background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); padding: 8px; border-radius: 8px; color: white; font-size: 12px;">
+                    <textarea id="texto-comentario" placeholder="Escribe tu comentario u opinión..." rows="2" required style="background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); padding: 8px; border-radius: 8px; color: white; font-size: 12px; resize: none;"></textarea>
+                    <button type="submit" class="btn-primary" style="padding: 8px; font-size: 12px;">Publicar Comentario</button>
+                </form>
+
+                <div id="lista-comentarios" style="max-height: 120px; overflow-y: auto; display: flex; flex-direction: column; gap: 6px;">
+                    <div style="background: rgba(0,0,0,0.3); padding: 8px; border-radius: 8px; font-size: 11px; border: 1px solid rgba(255,255,255,0.05);">
+                        <div style="display: flex; justify-content: space-weight; color: #818cf8; font-weight: bold;">
+                            <span>Carlos Mendoza</span>
+                        </div>
+                        <p style="color: #cbd5e1; margin-top: 2px;">¡Excelente servicio con la cita del pasaporte! Muy recomendado y rápido.</p>
+                    </div>
+                </div>
+            </div>
         </div>
         
         <div id="message" class="message"></div>
