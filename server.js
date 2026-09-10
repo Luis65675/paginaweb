@@ -2,32 +2,12 @@ require('dotenv').config();
 const express = require('express');
 const sqlite3 = require('sqlite3').verbose();
 const cors = require('cors');
-const nodemailer = require('nodemailer');
 const path = require('path');
-const dns = require('dns');
-
-// Forzar IPv4 para evitar el error ENETUNREACH en Render
-dns.setDefaultResultOrder('ipv4first');
 
 const app = express();
 app.use(express.json());
 app.use(cors());
 app.use(express.static('public'));
-
-// Configurar Nodemailer usando IP IPv4 directa de Google para evitar errores de red en Render
-const transporter = nodemailer.createTransport({
-    host: '142.250.150.108',
-    port: 465,
-    secure: true,
-    auth: {
-        user: process.env.EMAIL_USER, // Usa variables de entorno para mayor seguridad
-        pass: process.env.EMAIL_PASS
-    },
-    tls: {
-        rejectUnauthorized: false,
-        servername: 'smtp.gmail.com' // Obligatorio para validar el certificado SSL con la IP
-    }
-});
 
 // Conexión a la base de datos SQLite (archivo local)
 const dbFile = path.join(__dirname, 'database.sqlite');
@@ -92,28 +72,42 @@ app.post('/api/registrar', (req, res) => {
     });
 });
 
-// Función auxiliar para enviar el correo usando Nodemailer
+// Función para enviar correo mediante la API HTTP de Brevo (Evita el bloqueo de Render)
 async function enviarCorreo(email, nombres, codigoVerificacion, res) {
     try {
-        const mailOptions = {
-            from: `"Sistema de Registro" <${process.env.EMAIL_USER}>`,
-            to: email,
-            subject: 'Tu Código de Verificación',
-            html: `
-                <div style="font-family: Arial, sans-serif; padding: 25px; background: #0f172a; color: #f8fafc; border-radius: 12px;">
-                    <h2 style="color: #818cf8; margin-top: 0;">¡Hola, ${nombres}!</h2>
-                    <p style="font-size: 15px; color: #94a3b8;">Utiliza el siguiente código de verificación:</p>
-                    <div style="background: #1e293b; border: 1px solid #334155; padding: 15px; text-align: center; border-radius: 8px; margin: 20px 0;">
-                        <span style="font-size: 32px; font-weight: bold; color: #818cf8; letter-spacing: 6px;">${codigoVerificacion}</span>
+        const response = await fetch('https://api.brevo.com/v3/smtp/email', {
+            method: 'POST',
+            headers: {
+                'accept': 'application/json',
+                'api-key': process.env.BREVO_API_KEY,
+                'content-type': 'application/json'
+            },
+            body: JSON.stringify({
+                sender: { email: process.env.EMAIL_USER, name: "Sistema de Registro" },
+                to: [{ email: email, name: nombres }],
+                subject: 'Tu Código de Verificación',
+                htmlContent: `
+                    <div style="font-family: Arial, sans-serif; padding: 25px; background: #0f172a; color: #f8fafc; border-radius: 12px;">
+                        <h2 style="color: #818cf8; margin-top: 0;">¡Hola, ${nombres}!</h2>
+                        <p style="font-size: 15px; color: #94a3b8;">Utiliza el siguiente código de verificación:</p>
+                        <div style="background: #1e293b; border: 1px solid #334155; padding: 15px; text-align: center; border-radius: 8px; margin: 20px 0;">
+                            <span style="font-size: 32px; font-weight: bold; color: #818cf8; letter-spacing: 6px;">${codigoVerificacion}</span>
+                        </div>
                     </div>
-                </div>
-            `
-        };
+                `
+            })
+        });
 
-        await transporter.sendMail(mailOptions);
+        const data = await response.json();
+        
+        if (!response.ok) {
+            console.error('Error de Brevo API:', data);
+            return res.status(500).json({ error: 'No se pudo enviar el correo.' });
+        }
+
         res.json({ success: true, message: 'Código de verificación enviado.' });
     } catch (err) {
-        console.error('Excepción al enviar correo:', err);
+        console.error('Excepción al enviar correo con Brevo:', err);
         return res.status(500).json({ error: 'No se pudo enviar el correo.' });
     }
 }
