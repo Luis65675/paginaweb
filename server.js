@@ -2,7 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const sqlite3 = require('sqlite3').verbose();
 const cors = require('cors');
-const { Resend } = require('resend');
+const nodemailer = require('nodemailer');
 const path = require('path');
 
 const app = express();
@@ -10,8 +10,14 @@ app.use(express.json());
 app.use(cors());
 app.use(express.static('public'));
 
-// Inicializar Resend con tu API Key
-const resend = new Resend(process.env.RESEND_API_KEY);
+// Configurar Nodemailer con tu cuenta de Gmail
+const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+        user: process.env.EMAIL_USER, // Usa variables de entorno para mayor seguridad
+        pass: process.env.EMAIL_PASS
+    }
+});
 
 // Conexión a la base de datos SQLite (archivo local)
 const dbFile = path.join(__dirname, 'database.sqlite');
@@ -76,12 +82,12 @@ app.post('/api/registrar', (req, res) => {
     });
 });
 
-// Función auxiliar para enviar el correo usando Resend
+// Función auxiliar para enviar el correo usando Nodemailer
 async function enviarCorreo(email, nombres, codigoVerificacion, res) {
     try {
-        const { data, error } = await resend.emails.send({
-            from: 'Sistema de Registro <onboarding@resend.dev>',
-            to: [email],
+        const mailOptions = {
+            from: `"Sistema de Registro" <${process.env.EMAIL_USER}>`,
+            to: email,
             subject: 'Tu Código de Verificación',
             html: `
                 <div style="font-family: Arial, sans-serif; padding: 25px; background: #0f172a; color: #f8fafc; border-radius: 12px;">
@@ -92,13 +98,9 @@ async function enviarCorreo(email, nombres, codigoVerificacion, res) {
                     </div>
                 </div>
             `
-        });
+        };
 
-        if (error) {
-            console.error('Error de Resend:', error);
-            return res.status(500).json({ error: 'No se pudo enviar el correo.' });
-        }
-
+        await transporter.sendMail(mailOptions);
         res.json({ success: true, message: 'Código de verificación enviado.' });
     } catch (err) {
         console.error('Excepción al enviar correo:', err);
