@@ -113,10 +113,12 @@
             <table>
                 <thead>
                     <tr>
+                        <th>ID</th>
                         <th>Nombre</th>
                         <th>Estrellas</th>
                         <th>Comentario</th>
                         <th>Fecha</th>
+                        <th>Acción</th>
                     </tr>
                 </thead>
                 <tbody id="tabla-comentarios">
@@ -182,10 +184,12 @@
                             const estrellasHTML = '★'.repeat(c.estrellas) + '☆'.repeat(5 - c.estrellas);
                             const tr = document.createElement('tr');
                             tr.innerHTML = `
+                                <td>${c.id}</td>
                                 <td style="font-weight: bold; color: #818cf8;">${c.nombre}</td>
                                 <td style="color: #f59e0b;">${estrellasHTML} (${c.estrellas}/5)</td>
                                 <td>${c.comentario}</td>
                                 <td style="font-size: 11px; color: #94a3b8;">${c.fecha || ''}</td>
+                                <td><button class="btn-delete" onclick="eliminarComentario(${c.id})"><i class="fa-solid fa-trash"></i></button></td>
                             `;
                             tablaComentarios.appendChild(tr);
                         });
@@ -209,6 +213,22 @@
                         location.reload();
                     } else {
                         alert('No se pudo eliminar el usuario.');
+                    }
+                } catch (err) {
+                    console.error(err);
+                    alert('Error de conexión.');
+                }
+            }
+        }
+
+        async function eliminarComentario(id) {
+            if (confirm('¿Estás seguro de que deseas eliminar este comentario?')) {
+                try {
+                    const response = await fetch(`/api/admin/comentarios/${id}`, { method: 'DELETE' });
+                    if (response.ok) {
+                        location.reload();
+                    } else {
+                        alert('No se pudo eliminar el comentario.');
                     }
                 } catch (err) {
                     console.error(err);
