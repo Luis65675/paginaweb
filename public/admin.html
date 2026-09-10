@@ -3,12 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panel de Administración - Usuarios</title>
+    <title>Panel de Administración - Usuarios y Comentarios</title>
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* Estilos específicos para la tabla de administración */
         body {
             display: block;
             padding: 20px;
@@ -22,6 +21,7 @@
             padding: 30px;
             border-radius: 20px;
             box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+            margin-bottom: 30px;
         }
         table {
             width: 100%;
@@ -73,6 +73,7 @@
 <body>
     <div class="background-glow"></div>
 
+    <!-- SECCIÓN 1: USUARIOS REGISTRADOS -->
     <div class="admin-container">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
             <div>
@@ -94,19 +95,46 @@
                         <th>Estado</th>
                         <th>Acción</th>
                     </tr>
-                <thead id="tabla-usuarios">
-                    <!-- Los usuarios se cargarán aquí automáticamente -->
                 </thead>
+                <tbody id="tabla-usuarios">
+                    <!-- Los usuarios se cargarán aquí automáticamente -->
+                </tbody>
             </table>
         </div>
         <div id="admin-message" style="margin-top: 15px; text-align: center; font-size: 13px;"></div>
+    </div>
+
+    <!-- SECCIÓN 2: COMENTARIOS Y ESTRELLAS -->
+    <div class="admin-container">
+        <h2 style="color: white; margin-bottom: 5px;">Comentarios y Calificaciones</h2>
+        <p class="subtitle" style="margin: 0; margin-bottom: 20px;">Reseñas enviadas por los usuarios desde la página principal</p>
+        
+        <div style="overflow-x: auto;">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Estrellas</th>
+                        <th>Comentario</th>
+                        <th>Fecha</th>
+                    </tr>
+                </thead>
+                <tbody id="tabla-comentarios">
+                    <!-- Los comentarios se cargarán aquí automáticamente -->
+                </tbody>
+            </table>
+        </div>
+        <div id="comentarios-message" style="margin-top: 15px; text-align: center; font-size: 13px;"></div>
     </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', async () => {
             const tablaUsuarios = document.getElementById('tabla-usuarios');
             const adminMessage = document.getElementById('admin-message');
+            const tablaComentarios = document.getElementById('tabla-comentarios');
+            const comentariosMessage = document.getElementById('comentarios-message');
 
+            // 1. Cargar Usuarios
             try {
                 const response = await fetch('/api/admin/usuarios');
                 const data = await response.json();
@@ -114,23 +142,22 @@
                 if (response.ok && data.success) {
                     if (data.usuarios.length === 0) {
                         adminMessage.textContent = 'No hay usuarios registrados todavía.';
-                        return;
+                    } else {
+                        tablaUsuarios.innerHTML = '';
+                        data.usuarios.forEach(user => {
+                            const tr = document.createElement('tr');
+                            tr.innerHTML = `
+                                <td>${user.id}</td>
+                                <td>${user.nombres} ${user.apellidos}</td>
+                                <td>${user.cedula}</td>
+                                <td>${user.telefono}</td>
+                                <td>${user.email}</td>
+                                <td>${user.verificado === 1 ? '<span class="badge-verify">Verificado</span>' : '<span class="badge-pending">Pendiente</span>'}</td>
+                                <td><button class="btn-delete" onclick="eliminarUsuario(${user.id})"><i class="fa-solid fa-trash"></i></button></td>
+                            `;
+                            tablaUsuarios.appendChild(tr);
+                        });
                     }
-
-                    tablaUsuarios.innerHTML = '';
-                    data.usuarios.forEach(user => {
-                        const tr = document.createElement('tr');
-                        tr.innerHTML = `
-                            <td>${user.id}</td>
-                            <td>${user.nombres} ${user.apellidos}</td>
-                            <td>${user.cedula}</td>
-                            <td>${user.telefono}</td>
-                            <td>${user.email}</td>
-                            <td>${user.verificado === 1 ? '<span class="badge-verify">Verificado</span>' : '<span class="badge-pending">Pendiente</span>'}</td>
-                            <td><button class="btn-delete" onclick="eliminarUsuario(${user.id})"><i class="fa-solid fa-trash"></i></button></td>
-                        `;
-                        tablaUsuarios.appendChild(tr);
-                    });
                 } else {
                     adminMessage.textContent = 'Error al cargar los usuarios.';
                     adminMessage.style.color = '#f43f5e';
@@ -139,6 +166,38 @@
                 console.error(err);
                 adminMessage.textContent = 'Error de conexión con el servidor.';
                 adminMessage.style.color = '#f43f5e';
+            }
+
+            // 2. Cargar Comentarios y Estrellas
+            try {
+                const resCom = await fetch('/api/admin/comentarios');
+                const dataCom = await resCom.json();
+
+                if (resCom.ok && dataCom.success) {
+                    if (dataCom.comentarios.length === 0) {
+                        comentariosMessage.textContent = 'No hay comentarios registrados todavía.';
+                    } else {
+                        tablaComentarios.innerHTML = '';
+                        dataCom.comentarios.forEach(c => {
+                            const estrellasHTML = '★'.repeat(c.estrellas) + '☆'.repeat(5 - c.estrellas);
+                            const tr = document.createElement('tr');
+                            tr.innerHTML = `
+                                <td style="font-weight: bold; color: #818cf8;">${c.nombre}</td>
+                                <td style="color: #f59e0b;">${estrellasHTML} (${c.estrellas}/5)</td>
+                                <td>${c.comentario}</td>
+                                <td style="font-size: 11px; color: #94a3b8;">${c.fecha || ''}</td>
+                            `;
+                            tablaComentarios.appendChild(tr);
+                        });
+                    }
+                } else {
+                    comentariosMessage.textContent = 'Error al cargar los comentarios.';
+                    comentariosMessage.style.color = '#f43f5e';
+                }
+            } catch (err) {
+                console.error(err);
+                comentariosMessage.textContent = 'Error de conexión al cargar comentarios.';
+                comentariosMessage.style.color = '#f43f5e';
             }
         });
 
