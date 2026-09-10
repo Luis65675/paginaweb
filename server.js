@@ -2,13 +2,16 @@ require('dotenv').config();
 const express = require('express');
 const sqlite3 = require('sqlite3').verbose();
 const cors = require('cors');
-const nodemailer = require('nodemailer');
+const { Resend } = require('resend');
 const path = require('path');
 
 const app = express();
 app.use(express.json());
 app.use(cors());
 app.use(express.static('public'));
+
+// Inicializar Resend con tu API Key
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 // Conexión a la base de datos SQLite (archivo local)
 const dbFile = path.join(__dirname, 'database.sqlite');
@@ -27,15 +30,6 @@ const db = new sqlite3.Database(dbFile, (err) => {
             codigoVerificacion TEXT,
             verificado INTEGER DEFAULT 0
         )`);
-    }
-});
-
-// Configuración de Nodemailer
-const transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS
     }
 });
 
@@ -82,28 +76,34 @@ app.post('/api/registrar', (req, res) => {
     });
 });
 
-// Función auxiliar para enviar el correo
-function enviarCorreo(email, nombres, codigoVerificacion, res) {
-    transporter.sendMail({
-        from: `"Sistema de Registro" <${process.env.EMAIL_USER}>`,
-        to: email,
-        subject: 'Tu Código de Verificación',
-        html: `
-            <div style="font-family: Arial, sans-serif; padding: 25px; background: #0f172a; color: #f8fafc; border-radius: 12px;">
-                <h2 style="color: #818cf8; margin-top: 0;">¡Hola, ${nombres}!</h2>
-                <p style="font-size: 15px; color: #94a3b8;">Utiliza el siguiente código de verificación:</p>
-                <div style="background: #1e293b; border: 1px solid #334155; padding: 15px; text-align: center; border-radius: 8px; margin: 20px 0;">
-                    <span style="font-size: 32px; font-weight: bold; color: #818cf8; letter-spacing: 6px;">${codigoVerificacion}</span>
+// Función auxiliar para enviar el correo usando Resend
+async function enviarCorreo(email, nombres, codigoVerificacion, res) {
+    try {
+        const { data, error } = await resend.emails.send({
+            from: 'Sistema de Registro <onboarding@resend.dev>',
+            to: [email],
+            subject: 'Tu Código de Verificación',
+            html: `
+                <div style="font-family: Arial, sans-serif; padding: 25px; background: #0f172a; color: #f8fafc; border-radius: 12px;">
+                    <h2 style="color: #818cf8; margin-top: 0;">¡Hola, ${nombres}!</h2>
+                    <p style="font-size: 15px; color: #94a3b8;">Utiliza el siguiente código de verificación:</p>
+                    <div style="background: #1e293b; border: 1px solid #334155; padding: 15px; text-align: center; border-radius: 8px; margin: 20px 0;">
+                        <span style="font-size: 32px; font-weight: bold; color: #818cf8; letter-spacing: 6px;">${codigoVerificacion}</span>
+                    </div>
                 </div>
-            </div>
-        `
-    }, (mailErr) => {
-        if (mailErr) {
-            console.error(mailErr);
+            `
+        });
+
+        if (error) {
+            console.error('Error de Resend:', error);
             return res.status(500).json({ error: 'No se pudo enviar el correo.' });
         }
+
         res.json({ success: true, message: 'Código de verificación enviado.' });
-    });
+    } catch (err) {
+        console.error('Excepción al enviar correo:', err);
+        return res.status(500).json({ error: 'No se pudo enviar el correo.' });
+    }
 }
 
 // Ruta 2: Verificación de código
