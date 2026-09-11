@@ -93,13 +93,10 @@
         <!-- Paso 3: Perfil Profesional de Servicios (Se muestra al verificar o iniciar sesión) -->
         <div id="perfil-section" class="form-section hidden" style="text-align: left; width: 100%;">
             <div style="text-align: center; margin-bottom: 20px;">
-                <!-- NUEVO: Contenedor de la foto de perfil con opción de subida desde el almacenamiento -->
-                <div style="margin-bottom: 12px; display: inline-block; position: relative;">
-                    <img id="img-perfil-preview" src="https://via.placeholder.com/90" alt="Foto de Perfil" style="width: 85px; height: 85px; border-radius: 50%; object-fit: cover; border: 2px solid #818cf8; display: block; margin: 0 auto 6px auto;">
+                <!-- Perfil grande con animación fina e interactivo (sin texto visible) -->
+                <div style="margin-bottom: 15px; display: inline-block;">
+                    <img id="img-perfil-preview" src="https://via.placeholder.com/130" alt="Foto de Perfil" style="width: 130px; height: 130px; border-radius: 50%; object-fit: cover; border: 3px solid #818cf8; display: block; margin: 0 auto; cursor: pointer; box-shadow: 0 4px 20px rgba(129, 140, 248, 0.4); transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);" title="Toca para cambiar tu foto" onmouseover="this.style.transform='scale(1.06)'; this.style.borderColor='#a5b4fc'; this.style.boxShadow='0 6px 25px rgba(165, 180, 252, 0.6)';" onmouseout="this.style.transform='scale(1)'; this.style.borderColor='#818cf8'; this.style.boxShadow='0 4px 20px rgba(129, 140, 248, 0.4)';">
                     <input type="file" id="input-subir-foto" accept="image/*" style="display: none;">
-                    <button type="button" onclick="document.getElementById('input-subir-foto').click()" style="background: #3b82f6; color: white; border: none; padding: 3px 8px; border-radius: 4px; font-size: 10px; cursor: pointer;">
-                        <i class="fa-solid fa-camera"></i> Subir foto
-                    </button>
                 </div>
 
                 <div style="font-size: 40px; color: #6366f1; margin-bottom: 5px;">

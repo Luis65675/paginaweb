@@ -50,6 +50,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const inputSubirFoto = document.getElementById('input-subir-foto');
     const imgPerfilPreview = document.getElementById('img-perfil-preview');
 
+    // Conectar el clic de la imagen para que abra el selector de archivos del dispositivo
+    if (imgPerfilPreview && inputSubirFoto) {
+        imgPerfilPreview.addEventListener('click', () => {
+            inputSubirFoto.click();
+        });
+    }
+
     if (inputSubirFoto && imgPerfilPreview) {
         inputSubirFoto.addEventListener('change', (e) => {
             const archivo = e.target.files[0];
