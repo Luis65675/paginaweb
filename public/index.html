@@ -93,6 +93,15 @@
         <!-- Paso 3: Perfil Profesional de Servicios (Se muestra al verificar o iniciar sesión) -->
         <div id="perfil-section" class="form-section hidden" style="text-align: left; width: 100%;">
             <div style="text-align: center; margin-bottom: 20px;">
+                <!-- NUEVO: Contenedor de la foto de perfil con opción de subida desde el almacenamiento -->
+                <div style="margin-bottom: 12px; display: inline-block; position: relative;">
+                    <img id="img-perfil-preview" src="https://via.placeholder.com/90" alt="Foto de Perfil" style="width: 85px; height: 85px; border-radius: 50%; object-fit: cover; border: 2px solid #818cf8; display: block; margin: 0 auto 6px auto;">
+                    <input type="file" id="input-subir-foto" accept="image/*" style="display: none;">
+                    <button type="button" onclick="document.getElementById('input-subir-foto').click()" style="background: #3b82f6; color: white; border: none; padding: 3px 8px; border-radius: 4px; font-size: 10px; cursor: pointer;">
+                        <i class="fa-solid fa-camera"></i> Subir foto
+                    </button>
+                </div>
+
                 <div style="font-size: 40px; color: #6366f1; margin-bottom: 5px;">
                     <i class="fa-solid fa-id-badge"></i>
                 </div>
