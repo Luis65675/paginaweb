@@ -210,6 +210,361 @@
         <div id="message" class="message"></div>
     </div>
 
+    <!-- BOT DE AYUDA FLOTANTE DRAGGABLE -->
+    <div id="help-bot-container">
+        <button id="help-bot-toggle" title="¿Necesitas ayuda? (Arrastrame)">
+            <i class="fa-solid fa-headset"></i>
+            <span class="bot-notification-dot"></span>
+        </button>
+
+        <div id="help-bot-window" class="bot-hidden">
+            <div class="bot-header">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <div class="bot-avatar"><i class="fa-solid fa-robot"></i></div>
+                    <div>
+                        <h4 style="margin: 0; color: white; font-size: 14px;">Asistente Virtual</h4>
+                        <span style="font-size: 10px; color: #22c55e;"><i class="fa-solid fa-circle" style="font-size: 8px;"></i> En línea</span>
+                    </div>
+                </div>
+                <button id="help-bot-close"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+
+            <div class="bot-body" id="bot-messages">
+                <div class="bot-message assistant">
+                    ¡Hola! Puedes arrastrarme por cualquier parte de la pantalla. ¿En qué te puedo ayudar hoy?
+                </div>
+            </div>
+
+            <div class="bot-footer">
+                <input type="text" id="bot-input" placeholder="Escribe tu consulta..." autocomplete="off">
+                <button id="bot-send"><i class="fa-solid fa-paper-plane"></i></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ESTILOS DEL BOT DE AYUDA -->
+    <style>
+        #help-bot-container {
+            position: fixed;
+            bottom: 25px;
+            right: 25px;
+            z-index: 9999;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            touch-action: none;
+        }
+
+        #help-bot-toggle {
+            width: 55px;
+            height: 55px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #6366f1, #818cf8);
+            color: white;
+            border: none;
+            cursor: grab;
+            box-shadow: 0 10px 25px rgba(99, 102, 241, 0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            position: relative;
+        }
+
+        #help-bot-toggle:active {
+            cursor: grabbing;
+        }
+
+        #help-bot-toggle:hover {
+            transform: scale(1.08);
+            box-shadow: 0 15px 30px rgba(99, 102, 241, 0.6);
+        }
+
+        .bot-notification-dot {
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            width: 12px;
+            height: 12px;
+            background-color: #22c55e;
+            border: 2px solid #0f172a;
+            border-radius: 50%;
+            pointer-events: none;
+        }
+
+        #help-bot-window {
+            position: absolute;
+            bottom: 70px;
+            right: 0;
+            width: 330px;
+            height: 450px;
+            background: rgba(15, 23, 42, 0.95);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(20px);
+            border-radius: 16px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            transform-origin: bottom right;
+        }
+
+        #help-bot-container.left-aligned #help-bot-window {
+            right: auto;
+            left: 0;
+            transform-origin: bottom left;
+        }
+
+        #help-bot-window.bot-hidden {
+            opacity: 0;
+            transform: scale(0.5);
+            pointer-events: none;
+            visibility: hidden;
+        }
+
+        .bot-header {
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .bot-avatar {
+            width: 32px;
+            height: 32px;
+            background: rgba(129, 140, 248, 0.2);
+            color: #818cf8;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+        }
+
+        #help-bot-close {
+            background: none;
+            border: none;
+            color: #94a3b8;
+            cursor: pointer;
+            font-size: 16px;
+            transition: color 0.2s;
+        }
+
+        #help-bot-close:hover {
+            color: white;
+        }
+
+        .bot-body {
+            flex: 1;
+            padding: 15px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            font-size: 12px;
+        }
+
+        .bot-message {
+            padding: 10px 12px;
+            border-radius: 10px;
+            max-width: 80%;
+            line-height: 1.4;
+        }
+
+        .bot-message.assistant {
+            background: rgba(255, 255, 255, 0.07);
+            color: #cbd5e1;
+            align-self: flex-start;
+            border-bottom-left-radius: 2px;
+        }
+
+        .bot-message.user {
+            background: #6366f1;
+            color: white;
+            align-self: flex-end;
+            border-bottom-right-radius: 2px;
+        }
+
+        .bot-footer {
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.03);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            gap: 8px;
+        }
+
+        #bot-input {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.07);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 8px 12px;
+            border-radius: 8px;
+            color: white;
+            font-size: 12px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        #bot-input:focus {
+            border-color: #818cf8;
+        }
+
+        #bot-send {
+            background: #6366f1;
+            color: white;
+            border: none;
+            width: 34px;
+            height: 34px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s;
+        }
+
+        #bot-send:hover {
+            background: #4f46e5;
+        }
+    </style>
+
+    <!-- LÓGICA DEL BOT Y MOVIMIENTO -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const container = document.getElementById('help-bot-container');
+            const toggleBtn = document.getElementById('help-bot-toggle');
+            const chatWindow = document.getElementById('help-bot-window');
+            const closeBtn = document.getElementById('help-bot-close');
+            const sendBtn = document.getElementById('bot-send');
+            const inputField = document.getElementById('bot-input');
+            const messagesContainer = document.getElementById('bot-messages');
+
+            let isDragging = false;
+            let hasMoved = false;
+            let startX, startY;
+            let initialX, initialY;
+
+            function dragStart(e) {
+                isDragging = true;
+                hasMoved = false;
+                
+                const clientX = e.type === 'touchstart' ? e.touches[0].clientX : e.clientX;
+                const clientY = e.type === 'touchstart' ? e.touches[0].clientY : e.clientY;
+
+                startX = clientX;
+                startY = clientY;
+
+                const rect = container.getBoundingClientRect();
+                initialX = rect.left;
+                initialY = rect.top;
+
+                container.style.bottom = 'auto';
+                container.style.right = 'auto';
+                container.style.left = initialX + 'px';
+                container.style.top = initialY + 'px';
+
+                document.addEventListener('mousemove', dragMove);
+                document.addEventListener('mouseup', dragEnd);
+                document.addEventListener('touchmove', dragMove, { passive: false });
+                document.addEventListener('touchend', dragEnd);
+            }
+
+            function dragMove(e) {
+                if (!isDragging) return;
+                hasMoved = true;
+
+                const clientX = e.type === 'touchmove' ? e.touches[0].clientX : e.clientX;
+                const clientY = e.type === 'touchmove' ? e.touches[0].clientY : e.clientY;
+
+                const dx = clientX - startX;
+                const dy = clientY - startY;
+
+                let newX = initialX + dx;
+                let newY = initialY + dy;
+
+                const maxX = window.innerWidth - container.offsetWidth;
+                const maxY = window.innerHeight - container.offsetHeight;
+
+                newX = Math.max(10, Math.min(newX, maxX - 10));
+                newY = Math.max(10, Math.min(newY, maxY - 10));
+
+                container.style.left = newX + 'px';
+                container.style.top = newY + 'px';
+
+                if (newX < window.innerWidth / 2) {
+                    container.classList.add('left-aligned');
+                } else {
+                    container.classList.remove('left-aligned');
+                }
+
+                if (e.type === 'touchmove') e.preventDefault();
+            }
+
+            function dragEnd() {
+                isDragging = false;
+                document.removeEventListener('mousemove', dragMove);
+                document.removeEventListener('mouseup', dragEnd);
+                document.removeEventListener('touchmove', dragMove);
+                document.removeEventListener('touchend', dragEnd);
+            }
+
+            toggleBtn.addEventListener('mousedown', dragStart);
+            toggleBtn.addEventListener('touchstart', dragStart);
+
+            toggleBtn.addEventListener('click', (e) => {
+                if (hasMoved) return;
+                chatWindow.classList.toggle('bot-hidden');
+                if (!chatWindow.classList.contains('bot-hidden')) {
+                    inputField.focus();
+                }
+            });
+
+            closeBtn.addEventListener('click', () => {
+                chatWindow.classList.add('bot-hidden');
+            });
+
+            function handleUserMessage() {
+                const text = inputField.value.trim();
+                if (!text) return;
+
+                appendMessage(text, 'user');
+                inputField.value = '';
+
+                setTimeout(() => {
+                    const botResponse = getBotResponse(text.toLowerCase());
+                    appendMessage(botResponse, 'assistant');
+                }, 600);
+            }
+
+            sendBtn.addEventListener('click', handleUserMessage);
+            inputField.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') handleUserMessage();
+            });
+
+            function appendMessage(text, sender) {
+                const msgDiv = document.createElement('div');
+                msgDiv.className = `bot-message ${sender}`;
+                msgDiv.textContent = text;
+                messagesContainer.appendChild(msgDiv);
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            }
+
+            function getBotResponse(input) {
+                if (input.includes('hola') || input.includes('saludos')) {
+                    return '¡Hola! Puedes arrastrarme libremente por la pantalla. ¿Cómo te ayudo?';
+                } else if (input.includes('registro') || input.includes('cuenta')) {
+                    return 'Puedes registrarte llenando los datos del formulario inicial o iniciar sesión si ya tienes cuenta.';
+                } else if (input.includes('tramite') || input.includes('servicio')) {
+                    return 'Ofrecemos gestiones de cédula, pasaporte, RIF, bancos y desarrollo web.';
+                } else {
+                    return 'Entiendo. Como tu asistente virtual, puedo orientarte en el registro y en los servicios disponibles.';
+                }
+            }
+        });
+    </script>
+
     <script src="script.js"></script>
 </body>
 </html>
