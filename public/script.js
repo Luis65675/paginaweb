@@ -1,4 +1,5 @@
-document.addEventListener('DOMContentLoaded', () => {
+
+  document.addEventListener('DOMContentLoaded', () => {
     const registerForm = document.getElementById('register-form');
     const loginForm = document.getElementById('login-form');
     const verifyForm = document.getElementById('verify-form');
@@ -451,4 +452,42 @@ document.addEventListener('DOMContentLoaded', () => {
         const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
         return text.replace(/[&<>"']/g, function(m) { return map[m]; });
     }
+
+    // --- FUNCIÓN AGREGADA PARA RESOLVER EL PROBLEMA DEL PANEL DE ADMINISTRACIÓN ---
+    function cargarUsuariosEnAdmin() {
+        const listaUsuariosAdmin = document.getElementById('lista-usuarios-admin');
+        if (!listaUsuariosAdmin) return;
+
+        let htmlUsuarios = '';
+        
+        for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            if (key && key.startsWith('user_')) {
+                try {
+                    const userData = JSON.parse(localStorage.getItem(key));
+                    if (userData) {
+                        htmlUsuarios += `
+                            <div style="background: rgba(0,0,0,0.4); padding: 10px; margin-bottom: 8px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.1); color: #fff;">
+                                <p><strong>Nombres:</strong> ${userData.nombres || ''} ${userData.apellidos || ''}</p>
+                                <p><strong>Cédula:</strong> ${userData.cedula || 'No especificada'}</p>
+                                <p><strong>Email:</strong> ${userData.email || key.replace('user_', '')}</p>
+                                <p><strong>Teléfono:</strong> ${userData.telefono || 'No especificado'}</p>
+                            </div>
+                        `;
+                    }
+                } catch (e) {
+                    console.error("Error al leer usuario del localStorage", e);
+                }
+            }
+        }
+
+        if (htmlUsuarios === '') {
+            listaUsuariosAdmin.innerHTML = '<p style="color: #94a3b8;">No hay usuarios registrados localmente.</p>';
+        } else {
+            listaUsuariosAdmin.innerHTML = htmlUsuarios;
+        }
+    }
+
+    // Ejecutar la sincronización del panel admin al iniciar
+    cargarUsuariosEnAdmin();
 });
