@@ -130,109 +130,96 @@
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', async () => {
+        document.addEventListener('DOMContentLoaded', () => {
             const tablaUsuarios = document.getElementById('tabla-usuarios');
             const adminMessage = document.getElementById('admin-message');
             const tablaComentarios = document.getElementById('tabla-comentarios');
             const comentariosMessage = document.getElementById('comentarios-message');
 
-            // 1. Cargar Usuarios
-            try {
-                const response = await fetch('/api/admin/usuarios');
-                const data = await response.json();
-
-                if (response.ok && data.success) {
-                    if (data.usuarios.length === 0) {
-                        adminMessage.textContent = 'No hay usuarios registrados todavía.';
-                    } else {
-                        tablaUsuarios.innerHTML = '';
-                        data.usuarios.forEach(user => {
-                            const tr = document.createElement('tr');
-                            tr.innerHTML = `
-                                <td>${user.id}</td>
-                                <td>${user.nombres} ${user.apellidos}</td>
-                                <td>${user.cedula}</td>
-                                <td>${user.telefono}</td>
-                                <td>${user.email}</td>
-                                <td>${user.verificado === 1 ? '<span class="badge-verify">Verificado</span>' : '<span class="badge-pending">Pendiente</span>'}</td>
-                                <td><button class="btn-delete" onclick="eliminarUsuario(${user.id})"><i class="fa-solid fa-trash"></i></button></td>
-                            `;
-                            tablaUsuarios.appendChild(tr);
-                        });
+            // 1. Cargar Usuarios desde localStorage
+            let usuariosList = [];
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key && key.startsWith('user_')) {
+                    try {
+                        const userData = JSON.parse(localStorage.getItem(key));
+                        if (userData) {
+                            usuariosList.push({ storageKey: key, ...userData });
+                        }
+                    } catch (e) {
+                        console.error(e);
                     }
-                } else {
-                    adminMessage.textContent = 'Error al cargar los usuarios.';
-                    adminMessage.style.color = '#f43f5e';
                 }
-            } catch (err) {
-                console.error(err);
-                adminMessage.textContent = 'Error de conexión con el servidor.';
-                adminMessage.style.color = '#f43f5e';
             }
 
-            // 2. Cargar Comentarios y Estrellas
-            try {
-                const resCom = await fetch('/api/admin/comentarios');
-                const dataCom = await resCom.json();
+            if (usuariosList.length === 0) {
+                adminMessage.textContent = 'No hay usuarios registrados todavía.';
+            } else {
+                tablaUsuarios.innerHTML = '';
+                usuariosList.forEach((user, index) => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>${user.id || (index + 1)}</td>
+                        <td>${user.nombres || ''} ${user.apellidos || ''}</td>
+                        <td>${user.cedula || 'N/A'}</td>
+                        <td>${user.telefono || 'N/A'}</td>
+                        <td>${user.email || user.storageKey.replace('user_', '')}</td>
+                        <td>${(user.verificado === 1 || user.verificado === true) ? '<span class="badge-verify">Verificado</span>' : '<span class="badge-pending">Pendiente</span>'}</td>
+                        <td><button class="btn-delete" onclick="eliminarUsuario('${user.storageKey}')"><i class="fa-solid fa-trash"></i></button></td>
+                    `;
+                    tablaUsuarios.appendChild(tr);
+                });
+            }
 
-                if (resCom.ok && dataCom.success) {
-                    if (dataCom.comentarios.length === 0) {
-                        comentariosMessage.textContent = 'No hay comentarios registrados todavía.';
-                    } else {
-                        tablaComentarios.innerHTML = '';
-                        dataCom.comentarios.forEach(c => {
-                            const estrellasHTML = '★'.repeat(c.estrellas) + '☆'.repeat(5 - c.estrellas);
-                            const tr = document.createElement('tr');
-                            tr.innerHTML = `
-                                <td>${c.id}</td>
-                                <td style="font-weight: bold; color: #818cf8;">${c.nombre}</td>
-                                <td style="color: #f59e0b;">${estrellasHTML} (${c.estrellas}/5)</td>
-                                <td>${c.comentario}</td>
-                                <td style="font-size: 11px; color: #94a3b8;">${c.fecha || ''}</td>
-                                <td><button class="btn-delete" onclick="eliminarComentario(${c.id})"><i class="fa-solid fa-trash"></i></button></td>
-                            `;
-                            tablaComentarios.appendChild(tr);
-                        });
-                    }
-                } else {
-                    comentariosMessage.textContent = 'Error al cargar los comentarios.';
-                    comentariosMessage.style.color = '#f43f5e';
+            // 2. Cargar Comentarios y Estrellas desde localStorage
+            let comentariosList = [];
+            usuariosList.forEach(user => {
+                if (user.comentarios && Array.isArray(user.comentarios)) {
+                    user.comentarios.forEach((c, cIndex) => {
+                        comentariosList.push({ userKey: user.storageKey, commentIndex: cIndex, ...c });
+                    });
                 }
-            } catch (err) {
-                console.error(err);
-                comentariosMessage.textContent = 'Error de conexión al cargar comentarios.';
-                comentariosMessage.style.color = '#f43f5e';
+            });
+
+            if (comentariosList.length === 0) {
+                comentariosMessage.textContent = 'No hay comentarios registrados todavía.';
+            } else {
+                tablaComentarios.innerHTML = '';
+                comentariosList.forEach((c, index) => {
+                    const estrellasHTML = '★'.repeat(c.estrellas || 5) + '☆'.repeat(5 - (c.estrellas || 5));
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>${c.id || (index + 1)}</td>
+                        <td style="font-weight: bold; color: #818cf8;">${c.nombre || 'Anónimo'}</td>
+                        <td style="color: #f59e0b;">${estrellasHTML} (${c.estrellas || 5}/5)</td>
+                        <td>${c.comentario || c.texto || ''}</td>
+                        <td style="font-size: 11px; color: #94a3b8;">${c.fecha || ''}</td>
+                        <td><button class="btn-delete" onclick="eliminarComentario('${c.userKey}', ${c.commentIndex})"><i class="fa-solid fa-trash"></i></button></td>
+                    `;
+                    tablaComentarios.appendChild(tr);
+                });
             }
         });
 
-        async function eliminarUsuario(id) {
+        function eliminarUsuario(storageKey) {
             if (confirm('¿Estás seguro de que deseas eliminar este usuario?')) {
-                try {
-                    const response = await fetch(`/api/admin/usuarios/${id}`, { method: 'DELETE' });
-                    if (response.ok) {
-                        location.reload();
-                    } else {
-                        alert('No se pudo eliminar el usuario.');
-                    }
-                } catch (err) {
-                    console.error(err);
-                    alert('Error de conexión.');
-                }
+                localStorage.removeItem(storageKey);
+                location.reload();
             }
         }
 
-        async function eliminarComentario(id) {
+        function eliminarComentario(userKey, commentIndex) {
             if (confirm('¿Estás seguro de que deseas eliminar este comentario?')) {
                 try {
-                    const response = await fetch(`/api/admin/comentarios/${id}`, { method: 'DELETE' });
-                    if (response.ok) {
+                    let userData = JSON.parse(localStorage.getItem(userKey));
+                    if (userData && userData.comentarios) {
+                        userData.comentarios.splice(commentIndex, 1);
+                        localStorage.setItem(userKey, JSON.stringify(userData));
                         location.reload();
-                    } else {
-                        alert('No se pudo eliminar el comentario.');
                     }
                 } catch (err) {
                     console.error(err);
-                    alert('Error de conexión.');
+                    alert('No se pudo eliminar el comentario.');
                 }
             }
         }
