@@ -69,10 +69,28 @@ document.addEventListener('DOMContentLoaded', () => {
     const imgPerfilPreview = document.getElementById('img-perfil-preview');
     const imgAdminPreview = document.getElementById('img-admin-preview'); // Elemento del panel de administración
 
-    // Conectar el clic de la imagen para que abra el selector de archivos del dispositivo
+    // Selector de archivos adicional exclusivo para el panel de administración (creado dinámicamente si no existe en HTML)
+    let inputSubirFotoAdmin = document.getElementById('input-subir-foto-admin');
+    if (!inputSubirFotoAdmin) {
+        inputSubirFotoAdmin = document.createElement('input');
+        inputSubirFotoAdmin.type = 'file';
+        inputSubirFotoAdmin.id = 'input-subir-foto-admin';
+        inputSubirFotoAdmin.accept = 'image/*';
+        inputSubirFotoAdmin.style.display = 'none';
+        document.body.appendChild(inputSubirFotoAdmin);
+    }
+
+    // Conectar el clic de la imagen de perfil para que abra el selector principal
     if (imgPerfilPreview && inputSubirFoto) {
         imgPerfilPreview.addEventListener('click', () => {
             inputSubirFoto.click();
+        });
+    }
+
+    // Conectar el clic de la imagen del panel admin para que abra el selector de almacenamiento
+    if (imgAdminPreview && inputSubirFotoAdmin) {
+        imgAdminPreview.addEventListener('click', () => {
+            inputSubirFotoAdmin.click();
         });
     }
 
@@ -88,6 +106,36 @@ document.addEventListener('DOMContentLoaded', () => {
                     // Actualizar también la foto en el panel de administración si existe
                     if (imgAdminPreview) {
                         imgAdminPreview.src = base64Image;
+                    }
+
+                    // Guardar la foto de perfil en el localStorage del usuario activo
+                    const emailActivo = localStorage.getItem('usuarioActivoEmail');
+                    if (emailActivo) {
+                        let userData = JSON.parse(localStorage.getItem('user_' + emailActivo));
+                        if (userData) {
+                            userData.foto = base64Image;
+                            localStorage.setItem('user_' + emailActivo, JSON.stringify(userData));
+                        }
+                    }
+                };
+                lector.readAsDataURL(archivo);
+            }
+        });
+    }
+
+    // Lógica para procesar la subida de foto directamente desde el panel de administración
+    if (inputSubirFotoAdmin && imgAdminPreview) {
+        inputSubirFotoAdmin.addEventListener('change', (e) => {
+            const archivo = e.target.files[0];
+            if (archivo) {
+                const lector = new FileReader();
+                lector.onload = function(evento) {
+                    const base64Image = evento.target.result;
+                    imgAdminPreview.src = base64Image;
+
+                    // Actualizar también la foto en el perfil principal si existe
+                    if (imgPerfilPreview) {
+                        imgPerfilPreview.src = base64Image;
                     }
 
                     // Guardar la foto de perfil en el localStorage del usuario activo
