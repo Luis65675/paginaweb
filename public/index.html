@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Registro Moderno & Servicios</title>
     <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <!-- FontAwesome para iconos de estrellas, WhatsApp y perfil -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -26,6 +26,28 @@
         .anim-perfil-3 { animation: fadeInUp 0.7s ease 0.2s forwards; opacity: 0; }
         .anim-perfil-4 { animation: fadeInUp 0.8s ease 0.3s forwards; opacity: 0; }
         .anim-perfil-5 { animation: fadeInUp 0.9s ease 0.4s forwards; opacity: 0; }
+
+        /* Estilo y efecto brillante/gradiente para el título principal */
+        .titulo-servicio {
+            font-size: 23px;
+            font-weight: 800;
+            margin-bottom: 6px;
+            background: linear-gradient(135deg, #ffffff 20%, #a5b4fc 60%, #818cf8 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -0.5px;
+            text-shadow: 0 2px 15px rgba(129, 140, 248, 0.2);
+        }
+
+        /* Estilo mejorado para el subtítulo */
+        .subtitulo-servicio {
+            font-size: 13px;
+            font-weight: 600;
+            color: #94a3b8;
+            margin-bottom: 12px;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
     </style>
 </head>
 <body>
@@ -121,8 +143,8 @@
                 <div style="font-size: 40px; color: #6366f1; margin-bottom: 5px;">
                     <i class="fa-solid fa-id-badge"></i>
                 </div>
-                <h2 style="font-size: 22px; margin-bottom: 5px;">Servicios Profesionales & Trámites</h2>
-                <p class="subtitle" style="margin-bottom: 10px;">Gestiones en Venezuela & Desarrollo Web</p>
+                <h2 class="titulo-servicio">Servicios Profesionales & Trámites</h2>
+                <p class="subtitulo-servicio">Gestiones en Venezuela & Desarrollo Web</p>
                 <div style="color: #f59e0b; font-size: 14px;">
                     <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
                     <span style="color: #94a3b8; font-size: 12px;">(4.9/5 Calificación)</span>
