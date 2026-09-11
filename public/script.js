@@ -14,6 +14,24 @@ document.addEventListener('DOMContentLoaded', () => {
     const showLogin = document.getElementById('show-login');
     const showRegister = document.getElementById('show-register');
 
+    // FORZAR INICIO AL COMIENZO: Aseguramos que siempre arranca limpio en el registro
+    if (perfilSection) {
+        perfilSection.classList.remove('active');
+        perfilSection.classList.add('hidden');
+    }
+    if (verifySection) {
+        verifySection.classList.remove('active');
+        verifySection.classList.add('hidden');
+    }
+    if (loginSection) {
+        loginSection.classList.remove('active');
+        loginSection.classList.add('hidden');
+    }
+    if (registerSection) {
+        registerSection.classList.remove('hidden');
+        registerSection.classList.add('active');
+    }
+
     if (showLogin) {
         showLogin.addEventListener('click', (e) => {
             e.preventDefault();
@@ -38,12 +56,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let emailActual = '';
 
-    // Verificar si ya hay una sesión guardada previamente en este navegador
-    const usuarioActivoEmail = localStorage.getItem('usuarioActivoEmail');
-    if (usuarioActivoEmail) {
-        cargarPerfilGuardado(usuarioActivoEmail);
-    }
-
     // CONFIGURACIÓN DE WHATSAPP (Coloca tu número aquí en formato internacional sin +)
     const telefonoWhatsApp = "584149019748"; // <--- CAMBIA ESTE NÚMERO POR EL TUYO
     const mensajeWhatsApp = "¡Hola! Me interesa información sobre los trámites en Venezuela y desarrollo web que vi en tu perfil.";
@@ -52,7 +64,7 @@ document.addEventListener('DOMContentLoaded', () => {
         btnWhatsapp.href = `https://wa.me/${telefonoWhatsApp}?text=${encodeURIComponent(mensajeWhatsApp)}`;
     }
 
-    // NUEVO: Manejo de la vista previa de la foto de perfil seleccionada del dispositivo
+    // Manejo de la vista previa de la foto de perfil seleccionada del dispositivo
     const inputSubirFoto = document.getElementById('input-subir-foto');
     const imgPerfilPreview = document.getElementById('img-perfil-preview');
 
@@ -102,14 +114,12 @@ document.addEventListener('DOMContentLoaded', () => {
             messageDiv.style.color = '#818cf8';
 
             try {
-                // Manteniendo tu llamada original al backend si está disponible
                 const response = await fetch('/api/registrar', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ nombres, apellidos, cedula, telefono, email: emailActual, password })
-                }).catch(() => null); // Respaldo por si se ejecuta puramente local sin servidor backend activo
+                }).catch(() => null);
 
-                // Crear o actualizar datos locales para persistencia garantizada
                 const userData = {
                     nombres, apellidos, cedula, telefono, email: emailActual, password,
                     foto: "https://via.placeholder.com/130",
@@ -131,7 +141,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             } catch (err) {
                 console.error(err);
-                // Si el backend falla, permitimos continuar localmente para asegurar el funcionamiento
                 const userData = {
                     nombres, apellidos, cedula, telefono, email: emailActual, password,
                     foto: "https://via.placeholder.com/130",
@@ -166,7 +175,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     body: JSON.stringify({ email, password })
                 }).catch(() => null);
 
-                // Verificación local contra localStorage
                 const storedUserJson = localStorage.getItem('user_' + email);
                 let loginValido = false;
 
@@ -345,7 +353,6 @@ document.addEventListener('DOMContentLoaded', () => {
                         })
                     }).catch(() => null);
 
-                    // Guardar también en localStorage del usuario activo para persistencia inmediata
                     const emailActivo = localStorage.getItem('usuarioActivoEmail');
                     if (emailActivo) {
                         let userData = JSON.parse(localStorage.getItem('user_' + emailActivo));
