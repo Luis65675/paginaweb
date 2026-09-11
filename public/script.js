@@ -39,7 +39,7 @@
     let emailActual = '';
 
     // CONFIGURACIÓN DE WHATSAPP (Coloca tu número aquí en formato internacional sin +)
-    const telefonoWhatsApp = "584120000000"; // <--- CAMBIA ESTE NÚMERO POR EL TUYO
+    const telefonoWhatsApp = "584149019748"; // <--- CAMBIA ESTE NÚMERO POR EL TUYO
     const mensajeWhatsApp = "¡Hola! Me interesa información sobre los trámites en Venezuela y desarrollo web que vi en tu perfil.";
     const btnWhatsapp = document.getElementById('btn-whatsapp');
     if (btnWhatsapp) {
