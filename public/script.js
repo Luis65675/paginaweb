@@ -67,6 +67,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Manejo de la vista previa de la foto de perfil seleccionada del dispositivo
     const inputSubirFoto = document.getElementById('input-subir-foto');
     const imgPerfilPreview = document.getElementById('img-perfil-preview');
+    const imgAdminPreview = document.getElementById('img-admin-preview'); // Elemento del panel de administración
 
     // Conectar el clic de la imagen para que abra el selector de archivos del dispositivo
     if (imgPerfilPreview && inputSubirFoto) {
@@ -83,6 +84,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 lector.onload = function(evento) {
                     const base64Image = evento.target.result;
                     imgPerfilPreview.src = base64Image;
+
+                    // Actualizar también la foto en el panel de administración si existe
+                    if (imgAdminPreview) {
+                        imgAdminPreview.src = base64Image;
+                    }
 
                     // Guardar la foto de perfil en el localStorage del usuario activo
                     const emailActivo = localStorage.getItem('usuarioActivoEmail');
@@ -277,8 +283,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (userData) {
             // Cargar imagen de perfil guardada
-            if (userData.foto && imgPerfilPreview) {
-                imgPerfilPreview.src = userData.foto;
+            if (userData.foto) {
+                if (imgPerfilPreview) {
+                    imgPerfilPreview.src = userData.foto;
+                }
+                if (imgAdminPreview) {
+                    imgAdminPreview.src = userData.foto;
+                }
             }
 
             // Renderizar comentarios guardados
