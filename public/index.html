@@ -8,6 +8,25 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <!-- FontAwesome para iconos de estrellas, WhatsApp y perfil -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Animaciones finas y modernas para el perfil */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .anim-perfil-1 { animation: fadeInUp 0.5s ease forwards; opacity: 0; }
+        .anim-perfil-2 { animation: fadeInUp 0.6s ease 0.1s forwards; opacity: 0; }
+        .anim-perfil-3 { animation: fadeInUp 0.7s ease 0.2s forwards; opacity: 0; }
+        .anim-perfil-4 { animation: fadeInUp 0.8s ease 0.3s forwards; opacity: 0; }
+        .anim-perfil-5 { animation: fadeInUp 0.9s ease 0.4s forwards; opacity: 0; }
+    </style>
 </head>
 <body>
     <div class="background-glow"></div>
@@ -92,7 +111,7 @@
 
         <!-- Paso 3: Perfil Profesional de Servicios (Se muestra al verificar o iniciar sesión) -->
         <div id="perfil-section" class="form-section hidden" style="text-align: left; width: 100%;">
-            <div style="text-align: center; margin-bottom: 20px;">
+            <div style="text-align: center; margin-bottom: 20px;" class="anim-perfil-1">
                 <!-- Perfil grande con animación fina e interactivo (sin texto visible) -->
                 <div style="margin-bottom: 15px; display: inline-block;">
                     <img id="img-perfil-preview" src="https://via.placeholder.com/130" alt="Foto de Perfil" style="width: 130px; height: 130px; border-radius: 50%; object-fit: cover; border: 3px solid #818cf8; display: block; margin: 0 auto; cursor: pointer; box-shadow: 0 4px 20px rgba(129, 140, 248, 0.4); transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);" title="Toca para cambiar tu foto" onmouseover="this.style.transform='scale(1.06)'; this.style.borderColor='#a5b4fc'; this.style.boxShadow='0 6px 25px rgba(165, 180, 252, 0.6)';" onmouseout="this.style.transform='scale(1)'; this.style.borderColor='#818cf8'; this.style.boxShadow='0 4px 20px rgba(129, 140, 248, 0.4)';">
@@ -111,7 +130,7 @@
             </div>
 
             <!-- Descripción Comercial persuasiva -->
-            <div style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); padding: 15px; border-radius: 12px; font-size: 13px; color: #cbd5e1; line-height: 1.5; margin-bottom: 20px;">
+            <div class="anim-perfil-2" style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); padding: 15px; border-radius: 12px; font-size: 13px; color: #cbd5e1; line-height: 1.5; margin-bottom: 20px;">
                 <p style="margin-bottom: 10px;">
                     ¿Necesitas resolver tus trámites legales y bancarios en Venezuela de forma <strong>rápida, segura y 100% garantizada</strong>? Evita pérdidas de tiempo. Ofrezco asistencia profesional y gestión directa para:
                 </p>
@@ -129,7 +148,7 @@
             </div>
 
             <!-- Botón de WhatsApp Directo -->
-            <div style="margin-bottom: 20px;">
+            <div class="anim-perfil-3" style="margin-bottom: 20px;">
                 <a id="btn-whatsapp" href="#" target="_blank" class="btn-primary" style="background: #22c55e; display: flex; align-items: center; justify-content: center; gap: 10px; text-decoration: none;">
                     <i class="fa-brands fa-whatsapp" style="font-size: 18px;"></i>
                     <span>Contactar por WhatsApp Directo</span>
@@ -137,7 +156,7 @@
             </div>
 
             <!-- Sistema de Estrellas y Comentarios -->
-            <div style="border-top: 1px solid rgba(255, 255, 255, 0.1); padding-top: 15px;">
+            <div class="anim-perfil-4" style="border-top: 1px solid rgba(255, 255, 255, 0.1); padding-top: 15px;">
                 <p style="font-size: 13px; font-weight: 600; margin-bottom: 8px; color: #e2e8f0;">Califica este servicio:</p>
                 <div id="star-container" style="display: flex; gap: 8px; font-size: 20px; color: #475569; cursor: pointer; margin-bottom: 12px;">
                     <i class="fa-solid fa-star" data-value="1"></i>
@@ -157,7 +176,7 @@
                 </form>
 
                 <div id="lista-comentarios" style="max-height: 120px; overflow-y: auto; display: flex; flex-direction: column; gap: 6px;">
-                    <div style="background: rgba(0,0,0,0.3); padding: 8px; border-radius: 8px; font-size: 11px; border: 1px solid rgba(255,255,255,0.05);">
+                    <div class="anim-perfil-5" style="background: rgba(0,0,0,0.3); padding: 8px; border-radius: 8px; font-size: 11px; border: 1px solid rgba(255,255,255,0.05);">
                         <div style="display: flex; justify-content: space-between; color: #818cf8; font-weight: bold;">
                             <span>Carlos Mendoza</span>
                         </div>
